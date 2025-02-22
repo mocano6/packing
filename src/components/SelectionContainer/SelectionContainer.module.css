@@ -1,0 +1,56 @@
+/* src/components/SelectionContainer/SelectionContainer.module.css */
+
+.selectionContainer {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selectionRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.selectionRow:last-child {
+  margin-bottom: 0;
+}
+
+.selectionLabel {
+  min-width: 100px;
+  font-weight: 500;
+  color: #666;
+}
+
+.selectedPlayer {
+  font-weight: 500;
+  color: #2196f3;
+}
+
+.receiverSelect {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.receiverSelect:hover {
+  border-color: #2196f3;
+}
+
+.receiverSelect:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.receiverSelect option {
+  padding: 8px;
+}

@@ -1,0 +1,153 @@
+/* src/components/FootballPitch/FootballPitch.module.css */
+
+.pitchContainer {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  aspect-ratio: 12/8;
+  position: relative;
+  padding: 16px;
+}
+
+.pitch {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 1;
+}
+
+.zoneCell {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  position: relative;
+}
+
+.zoneCell:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.zoneCell.selected {
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.xTValue {
+  font-size: 0.8vw;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.zoneCell:hover .xTValue,
+.zoneCell.selected .xTValue {
+  opacity: 1;
+}
+
+.pitchLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.centerLine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+.centerCircle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20%;
+  height: 30%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Lewa strona */
+.penaltyAreaLeft {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  width: 16.6%;
+  height: 60%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-left: none;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+.goalAreaLeft {
+  position: absolute;
+  left: 0;
+  top: 35%;
+  width: 5.5%;
+  height: 30%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-left: none;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Prawa strona */
+.penaltyAreaRight {
+  position: absolute;
+  right: 0;
+  top: 20%;
+  width: 16.6%;
+  height: 60%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-right: none;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+.goalAreaRight {
+  position: absolute;
+  right: 0;
+  top: 35%;
+  width: 5.5%;
+  height: 30%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-right: none;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+  .pitchContainer {
+    padding: 8px;
+  }
+
+  .xTValue {
+    font-size: 10px;
+  }
+}
