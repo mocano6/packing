@@ -1,35 +1,28 @@
-// src/App.tsx
-
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import styles from "./App.module.css";
 import { Player, Action } from "./types";
 import SelectionContainer from "./components/SelectionContainer/SelectionContainer";
 import FootballPitch from "./components/FootballPitch/FootballPitch";
 import PointsButtons from "./components/PointsButtons/PointsButtons";
 import ActionsTable from "./components/ActionsTable/ActionsTable";
 import PlayerModal from "./components/PlayerModal/PlayerModal";
-import { XT_VALUES } from "./components/FootballPitch/constants";
 import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
 import Instructions from "./components/Instructions/Instructions";
+import ExportButton from "./components/ExportButton/ExportButton";
 
 const App: React.FC = () => {
-  // Stan dla zawodników
   const [players, setPlayers] = useState<Player[]>(() => {
     const savedPlayers = localStorage.getItem("players");
     return savedPlayers ? JSON.parse(savedPlayers) : [];
   });
 
-  // Stan dla akcji
   const [actions, setActions] = useState<Action[]>(() => {
     const savedActions = localStorage.getItem("actions");
     return savedActions ? JSON.parse(savedActions) : [];
   });
 
-  // Stan dla modalowego okna dodawania/edycji zawodnika
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
-
-  // Stan dla aktualnie wybranej akcji
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [selectedReceiverId, setSelectedReceiverId] = useState<string | null>(
     null
@@ -37,8 +30,22 @@ const App: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
   const [currentPoints, setCurrentPoints] = useState(0);
   const [actionMinute, setActionMinute] = useState<number>(0);
+  const [xTValue, setXTValue] = useState<number | null>(null);
+  const [clickValue1, setClickValue1] = useState<number | null>(null);
+  const [clickValue2, setClickValue2] = useState<number | null>(null);
 
-  // Zapisywanie danych przy zmianach
+  const handleZoneSelect = (
+    zone: number | null,
+    xT?: number,
+    value1?: number,
+    value2?: number
+  ) => {
+    setSelectedZone(zone);
+    if (xT !== undefined) setXTValue(xT);
+    if (value1 !== undefined) setClickValue1(value1);
+    if (value2 !== undefined) setClickValue2(value2);
+  };
+
   useEffect(() => {
     localStorage.setItem("players", JSON.stringify(players));
   }, [players]);
@@ -47,24 +54,22 @@ const App: React.FC = () => {
     localStorage.setItem("actions", JSON.stringify(actions));
   }, [actions]);
 
-  // Funkcja resetująca stan aktualnej akcji
   const resetActionState = () => {
     setSelectedReceiverId(null);
     setSelectedZone(null);
     setCurrentPoints(0);
     setActionMinute(0);
+    setClickValue1(null);
+    setClickValue2(null);
   };
 
-  // Funkcja obsługująca zapisywanie/edycję zawodnika
   const handleSavePlayer = (playerData: Omit<Player, "id">) => {
     if (editingPlayerId) {
-      // Edycja istniejącego zawodnika
       const updatedPlayers = players.map((player) =>
         player.id === editingPlayerId ? { ...player, ...playerData } : player
       );
       setPlayers(updatedPlayers);
     } else {
-      // Dodawanie nowego zawodnika
       const newPlayer: Player = {
         id: crypto.randomUUID(),
         ...playerData,
@@ -75,7 +80,6 @@ const App: React.FC = () => {
     setEditingPlayerId(null);
   };
 
-  // Funkcja obsługująca usuwanie zawodnika
   const handleDeletePlayer = (playerId: string) => {
     if (window.confirm("Czy na pewno chcesz usunąć tego zawodnika?")) {
       setPlayers((prev) => prev.filter((p) => p.id !== playerId));
@@ -86,7 +90,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Funkcja obsługująca zapisywanie akcji
   const handleSaveAction = () => {
     if (!selectedPlayerId || !selectedReceiverId || selectedZone === null) {
       alert("Wybierz nadawcę, odbiorcę i strefę boiska!");
@@ -95,8 +98,7 @@ const App: React.FC = () => {
 
     const sender = players.find((p) => p.id === selectedPlayerId)!;
     const receiver = players.find((p) => p.id === selectedReceiverId)!;
-    const multiplier =
-      XT_VALUES[Math.floor(selectedZone / 12)][selectedZone % 12];
+    const multiplier = (clickValue2 ?? 0) - (clickValue1 ?? 0);
 
     const newAction: Action = {
       id: crypto.randomUUID(),
@@ -105,9 +107,11 @@ const App: React.FC = () => {
       senderId: selectedPlayerId,
       senderName: sender.name,
       senderNumber: sender.number,
+      senderClickValue: clickValue1 ?? 0,
       receiverId: selectedReceiverId,
       receiverName: receiver.name,
       receiverNumber: receiver.number,
+      receiverClickValue: clickValue2 ?? 0,
       zone: selectedZone,
       basePoints: currentPoints,
       multiplier: multiplier,
@@ -118,7 +122,6 @@ const App: React.FC = () => {
     resetActionState();
   };
 
-  // Funkcja obsługująca usuwanie akcji
   const handleDeleteAction = (actionId: string) => {
     if (window.confirm("Czy na pewno chcesz usunąć tę akcję?")) {
       setActions((prev) => prev.filter((action) => action.id !== actionId));
@@ -126,12 +129,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <header className="header">
+    <div className={styles.container}>
+      <header className={styles.header}>
         <h1>Packing Rate Calculator</h1>
       </header>
 
-      <main className="content">
+      <main className={styles.content}>
         <Instructions />
         <PlayersGrid
           players={players}
@@ -145,43 +148,51 @@ const App: React.FC = () => {
           onDeletePlayer={handleDeletePlayer}
         />
 
-        <SelectionContainer
-          players={players}
-          selectedPlayerId={selectedPlayerId}
-          selectedReceiverId={selectedReceiverId}
-          onReceiverSelect={setSelectedReceiverId}
-          actionMinute={actionMinute}
-          onMinuteChange={setActionMinute}
-        />
-
-        <FootballPitch
-          selectedZone={selectedZone}
-          onZoneSelect={setSelectedZone}
-        />
-
-        <PointsButtons
-          currentPoints={currentPoints}
-          onAddPoints={(points) => setCurrentPoints((prev) => prev + points)}
-          onSaveAction={handleSaveAction}
-          onReset={resetActionState}
-        />
+        <div className={styles.actionContainer}>
+          <div className={styles.pitchContainer}>
+            <FootballPitch
+              selectedZone={selectedZone}
+              onZoneSelect={handleZoneSelect}
+            />
+          </div>
+          <div className={styles.rightContainer}>
+            <SelectionContainer
+              players={players}
+              selectedPlayerId={selectedPlayerId}
+              selectedReceiverId={selectedReceiverId}
+              onReceiverSelect={setSelectedReceiverId}
+              actionMinute={actionMinute}
+              onMinuteChange={setActionMinute}
+            />
+            <PointsButtons
+              currentPoints={currentPoints}
+              onAddPoints={(points) =>
+                setCurrentPoints((prev) => prev + points)
+              }
+              onSaveAction={handleSaveAction}
+              onReset={resetActionState}
+            />
+          </div>
+        </div>
 
         <ActionsTable actions={actions} onDeleteAction={handleDeleteAction} />
-      </main>
 
-      <PlayerModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingPlayerId(null);
-        }}
-        onSave={handleSavePlayer}
-        editingPlayer={
-          editingPlayerId
-            ? players.find((p) => p.id === editingPlayerId)
-            : undefined
-        }
-      />
+        <PlayerModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingPlayerId(null);
+          }}
+          onSave={handleSavePlayer}
+          editingPlayer={
+            editingPlayerId
+              ? players.find((p) => p.id === editingPlayerId)
+              : undefined
+          }
+        />
+
+        <ExportButton players={players} actions={actions} />
+      </main>
     </div>
   );
 };

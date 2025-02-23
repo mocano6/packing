@@ -3,25 +3,32 @@
 import React from "react";
 import styles from "./FootballPitch.module.css";
 import { ZoneCellProps } from "./FootballPitch.types";
-import { getXTColor, getZoneDescription, formatXTValue } from "./utils";
+import { getXTColor } from "./utils";
 
 const ZoneCell: React.FC<ZoneCellProps> = ({
   zoneIndex,
   xTValue,
   isSelected,
+  isFirstSelection,
+  isSecondSelection,
   onSelect,
 }) => {
+  const getSelectionClass = () => {
+    if (isFirstSelection) return styles.firstSelection;
+    if (isSecondSelection) return styles.secondSelection;
+    if (isSelected) return styles.selected;
+    return "";
+  };
+
   return (
     <div
-      className={`${styles.zoneCell} ${isSelected ? styles.selected : ""}`}
+      className={`${styles.zoneCell} ${getSelectionClass()}`}
       onClick={() => onSelect(zoneIndex)}
       style={{
         backgroundColor: getXTColor(xTValue),
       }}
-      title={`${getZoneDescription(zoneIndex)}
-Wartość xT: ${formatXTValue(xTValue)}`}
     >
-      <span className={styles.xTValue}>{formatXTValue(xTValue)}</span>
+      <span className={styles.xTValue}>{xTValue.toFixed(3)}</span>
     </div>
   );
 };

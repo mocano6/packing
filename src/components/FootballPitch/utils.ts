@@ -1,53 +1,25 @@
 // src/components/FootballPitch/utils.ts
 
-/**
- * Przelicza wartość xT na kolor reprezentujący zagrożenie
- * @param xTValue - wartość xT (zakres 0.322-0.612)
- * @returns string z kolorem w formacie rgba
- */
 export const getXTColor = (xTValue: number): string => {
-  // Normalizacja wartości do zakresu 0-1
-  const normalizedValue = (xTValue - 0.322) / (0.612 - 0.322);
+  // Normalizacja do zakresu 0-1 używając faktycznych min/max z danych
+  const normalizedValue = (xTValue - 0.00638303) / (0.25745362 - 0.00638303);
 
-  // Kolory dla różnych przedziałów wartości xT
   if (normalizedValue < 0.2) {
-    return `rgba(65, 171, 93, 0.6)`; // zielony dla niskich wartości
+    return `rgba(49, 130, 189, 0.7)`; // niebieski dla bardzo niskich wartości
   } else if (normalizedValue < 0.4) {
-    return `rgba(254, 224, 139, 0.6)`; // żółty dla średnio-niskich
+    return `rgba(158, 202, 225, 0.7)`; // jasnoniebieski dla niskich wartości
   } else if (normalizedValue < 0.6) {
-    return `rgba(252, 141, 89, 0.6)`; // pomarańczowy dla średnich
+    return `rgba(255, 255, 191, 0.7)`; // żółty dla średnich wartości
   } else if (normalizedValue < 0.8) {
-    return `rgba(239, 59, 44, 0.6)`; // czerwony dla wysokich
+    return `rgba(254, 178, 76, 0.7)`; // pomarańczowy dla wysokich wartości
   } else {
-    return `rgba(203, 24, 29, 0.6)`; // ciemnoczerwony dla najwyższych
+    return `rgba(240, 59, 32, 0.7)`; // czerwony dla najwyższych wartości
   }
 };
 
-/**
- * Zwraca opis strefy boiska na podstawie indeksu
- * @param zoneIndex - indeks strefy
- * @returns string z opisem strefy
- */
-export const getZoneDescription = (zoneIndex: number): string => {
-  const rowIndex = Math.floor(zoneIndex / 12);
-  const colIndex = zoneIndex % 12;
-
-  if (rowIndex < 2) {
-    return "Strefa defensywna";
-  } else if (rowIndex < 4) {
-    return "Strefa środkowa defensywna";
-  } else if (rowIndex < 6) {
-    return "Strefa środkowa ofensywna";
-  } else {
-    return "Strefa ofensywna";
-  }
-};
-
-/**
- * Formatuje wartość xT do wyświetlenia
- * @param value - wartość xT
- * @returns sformatowana wartość jako string
- */
-export const formatXTValue = (value: number): string => {
-  return value.toFixed(3);
+export const calculateXTDifference = (
+  firstValue: number,
+  secondValue: number
+): number => {
+  return secondValue - firstValue;
 };
