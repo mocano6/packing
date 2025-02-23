@@ -9,11 +9,28 @@ const SelectionContainer: React.FC<SelectionContainerProps> = ({
   selectedPlayerId,
   selectedReceiverId,
   onReceiverSelect,
+  actionMinute,
+  onMinuteChange,
 }) => {
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId);
 
   return (
     <div className={styles.selectionContainer}>
+      <div className={styles.selectionRow}>
+        <span className={styles.selectionLabel}>Minuta:</span>
+        <div className={styles.minuteInput}>
+          <input
+            type="number"
+            value={actionMinute}
+            onChange={(e) => onMinuteChange(Number(e.target.value))}
+            min="0"
+            max="90"
+            className={styles.timeInput}
+          />
+          <span className={styles.minuteLabel}>min</span>
+        </div>
+      </div>
+
       <div className={styles.selectionRow}>
         <span className={styles.selectionLabel}>Nadawca:</span>
         <span className={styles.selectedPlayer}>

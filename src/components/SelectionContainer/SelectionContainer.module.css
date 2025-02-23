@@ -24,6 +24,44 @@
   color: #666;
 }
 
+.senderWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.minuteInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeInput {
+  width: 50px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.timeInput:hover {
+  border-color: #2196f3;
+}
+
+.timeInput:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.minuteLabel {
+  color: #666;
+  font-size: 14px;
+}
+
 .selectedPlayer {
   font-weight: 500;
   color: #2196f3;

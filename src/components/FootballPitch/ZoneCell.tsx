@@ -3,6 +3,7 @@
 import React from "react";
 import styles from "./FootballPitch.module.css";
 import { ZoneCellProps } from "./FootballPitch.types";
+import { getXTColor, getZoneDescription, formatXTValue } from "./utils";
 
 const ZoneCell: React.FC<ZoneCellProps> = ({
   zoneIndex,
@@ -15,14 +16,12 @@ const ZoneCell: React.FC<ZoneCellProps> = ({
       className={`${styles.zoneCell} ${isSelected ? styles.selected : ""}`}
       onClick={() => onSelect(zoneIndex)}
       style={{
-        // Gradient od zielonego do czerwonego bazując na wartości xT
-        backgroundColor: `rgba(${Math.round(255 * xTValue)}, 
-                              ${Math.round(255 * (1 - xTValue))}, 
-                              0, 
-                              0.2)`,
+        backgroundColor: getXTColor(xTValue),
       }}
+      title={`${getZoneDescription(zoneIndex)}
+Wartość xT: ${formatXTValue(xTValue)}`}
     >
-      <span className={styles.xTValue}>{xTValue.toFixed(3)}</span>
+      <span className={styles.xTValue}>{formatXTValue(xTValue)}</span>
     </div>
   );
 };

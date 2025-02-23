@@ -7,6 +7,7 @@ export interface Player {
 export interface Action {
   id: string;
   timestamp: string;
+  minute: number;
   senderId: string;
   senderName: string;
   senderNumber: number;

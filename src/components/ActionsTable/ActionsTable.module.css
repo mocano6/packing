@@ -39,15 +39,27 @@
   cursor: pointer;
   user-select: none;
   position: relative;
+  padding-right: 25px;
+  transition: background-color 0.2s;
 }
 
 .table th:hover {
   background-color: #e0e0e0;
 }
 
-.sortIndicator {
-  margin-left: 4px;
+.table th[data-active-sort="true"] {
   color: #2196f3;
+  background-color: #e3f2fd;
+}
+
+.sortIndicator {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2196f3;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 .table tbody tr:hover {

@@ -10,6 +10,7 @@ import ActionsTable from "./components/ActionsTable/ActionsTable";
 import PlayerModal from "./components/PlayerModal/PlayerModal";
 import { XT_VALUES } from "./components/FootballPitch/constants";
 import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
+import Instructions from "./components/Instructions/Instructions";
 
 const App: React.FC = () => {
   // Stan dla zawodników
@@ -35,6 +36,7 @@ const App: React.FC = () => {
   );
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
   const [currentPoints, setCurrentPoints] = useState(0);
+  const [actionMinute, setActionMinute] = useState<number>(0);
 
   // Zapisywanie danych przy zmianach
   useEffect(() => {
@@ -50,6 +52,7 @@ const App: React.FC = () => {
     setSelectedReceiverId(null);
     setSelectedZone(null);
     setCurrentPoints(0);
+    setActionMinute(0);
   };
 
   // Funkcja obsługująca zapisywanie/edycję zawodnika
@@ -98,6 +101,7 @@ const App: React.FC = () => {
     const newAction: Action = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
+      minute: actionMinute,
       senderId: selectedPlayerId,
       senderName: sender.name,
       senderNumber: sender.number,
@@ -128,6 +132,7 @@ const App: React.FC = () => {
       </header>
 
       <main className="content">
+        <Instructions />
         <PlayersGrid
           players={players}
           selectedPlayerId={selectedPlayerId}
@@ -145,6 +150,8 @@ const App: React.FC = () => {
           selectedPlayerId={selectedPlayerId}
           selectedReceiverId={selectedReceiverId}
           onReceiverSelect={setSelectedReceiverId}
+          actionMinute={actionMinute}
+          onMinuteChange={setActionMinute}
         />
 
         <FootballPitch

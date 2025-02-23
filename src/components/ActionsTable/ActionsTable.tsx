@@ -10,23 +10,28 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
   onDeleteAction,
 }) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: "timestamp",
-    direction: "desc",
+    key: "minute",
+    direction: "asc",
   });
-
-  const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString("pl-PL", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const sortedActions = useMemo(() => {
     const sorted = [...actions];
     sorted.sort((a, b) => {
+      if (sortConfig.key === "senderName") {
+        const aValue = `${a.senderNumber} - ${a.senderName}`;
+        const bValue = `${b.senderNumber} - ${b.senderName}`;
+        return sortConfig.direction === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      if (sortConfig.key === "receiverName") {
+        const aValue = `${a.receiverNumber} - ${a.receiverName}`;
+        const bValue = `${b.receiverNumber} - ${b.receiverName}`;
+        return sortConfig.direction === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "asc" ? -1 : 1;
       }
@@ -46,6 +51,17 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
     }));
   };
 
+  const renderSortIndicator = (key: keyof Action) => {
+    if (sortConfig.key === key) {
+      return (
+        <span className={styles.sortIndicator}>
+          {sortConfig.direction === "asc" ? "↑" : "↓"}
+        </span>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className={styles.tableContainer}>
       <h2 className={styles.tableTitle}>Historia akcji</h2>
@@ -53,26 +69,47 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
         <table className={styles.table}>
           <thead>
             <tr>
-              <th onClick={() => requestSort("timestamp")}>
-                Czas
-                {sortConfig.key === "timestamp" && (
-                  <span className={styles.sortIndicator}>
-                    {sortConfig.direction === "asc" ? "↑" : "↓"}
-                  </span>
-                )}
+              <th
+                onClick={() => requestSort("minute")}
+                data-active-sort={sortConfig.key === "minute"}
+              >
+                Minuta {renderSortIndicator("minute")}
               </th>
-              <th>Nadawca</th>
-              <th>Odbiorca</th>
-              <th>Strefa</th>
-              <th>Punkty bazowe</th>
-              <th>Mnożnik</th>
-              <th onClick={() => requestSort("totalPoints")}>
-                Punkty całkowite
-                {sortConfig.key === "totalPoints" && (
-                  <span className={styles.sortIndicator}>
-                    {sortConfig.direction === "asc" ? "↑" : "↓"}
-                  </span>
-                )}
+              <th
+                onClick={() => requestSort("senderName")}
+                data-active-sort={sortConfig.key === "senderName"}
+              >
+                Nadawca {renderSortIndicator("senderName")}
+              </th>
+              <th
+                onClick={() => requestSort("receiverName")}
+                data-active-sort={sortConfig.key === "receiverName"}
+              >
+                Odbiorca {renderSortIndicator("receiverName")}
+              </th>
+              <th
+                onClick={() => requestSort("zone")}
+                data-active-sort={sortConfig.key === "zone"}
+              >
+                Strefa {renderSortIndicator("zone")}
+              </th>
+              <th
+                onClick={() => requestSort("basePoints")}
+                data-active-sort={sortConfig.key === "basePoints"}
+              >
+                Punkty bazowe {renderSortIndicator("basePoints")}
+              </th>
+              <th
+                onClick={() => requestSort("multiplier")}
+                data-active-sort={sortConfig.key === "multiplier"}
+              >
+                Mnożnik {renderSortIndicator("multiplier")}
+              </th>
+              <th
+                onClick={() => requestSort("totalPoints")}
+                data-active-sort={sortConfig.key === "totalPoints"}
+              >
+                Punkty całkowite {renderSortIndicator("totalPoints")}
               </th>
               {onDeleteAction && <th>Akcje</th>}
             </tr>
@@ -80,7 +117,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
           <tbody>
             {sortedActions.map((action) => (
               <tr key={action.id}>
-                <td>{formatDate(action.timestamp)}</td>
+                <td>{action.minute}'</td>
                 <td>{`${action.senderNumber} - ${action.senderName}`}</td>
                 <td>{`${action.receiverNumber} - ${action.receiverName}`}</td>
                 <td>{action.zone}</td>

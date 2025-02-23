@@ -7,4 +7,6 @@ export interface SelectionContainerProps {
   selectedPlayerId: string | null;
   selectedReceiverId: string | null;
   onReceiverSelect: (playerId: string) => void;
+  actionMinute: number;
+  onMinuteChange: (minute: number) => void;
 }
