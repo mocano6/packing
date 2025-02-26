@@ -27,6 +27,17 @@ const SelectionContainer: React.FC<SelectionContainerProps> = ({
 }) => {
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId);
 
+  const availableReceivers = players.filter(
+    (player) => player.id !== selectedPlayerId
+  );
+
+  // Dodajemy efekt tutaj, przed returnem
+  React.useEffect(() => {
+    if (selectedReceiverId === selectedPlayerId) {
+      onReceiverSelect(null);
+    }
+  }, [selectedPlayerId, selectedReceiverId, onReceiverSelect]);
+
   return (
     <div className={styles.container}>
       <div className={styles.minuteContainer}>
@@ -64,7 +75,7 @@ const SelectionContainer: React.FC<SelectionContainerProps> = ({
             className={styles.select}
           >
             <option value="">Wybierz zawodnika</option>
-            {players.map((player) => (
+            {availableReceivers.map((player) => (
               <option key={player.id} value={player.id}>
                 {player.name} ({player.number})
               </option>
