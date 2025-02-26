@@ -1,94 +1,56 @@
-/* src/components/SelectionContainer/SelectionContainer.module.css */
-
-.selectionContainer {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* SelectionContainer.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 15px;
 }
 
-.selectionRow {
+.minuteContainer {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  gap: 10px;
 }
 
-.selectionRow:last-child {
-  margin-bottom: 0;
+.label {
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
 }
 
-.selectionLabel {
-  min-width: 100px;
-  font-weight: 500;
-  color: #666;
-}
-
-.senderWrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.minuteInput {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.timeInput {
-  width: 50px;
+.input {
+  width: 60px;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  color: #333;
-  text-align: center;
-  transition: border-color 0.2s;
 }
 
-.timeInput:hover {
-  border-color: #2196f3;
-}
-
-.timeInput:focus {
-  outline: none;
-  border-color: #2196f3;
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-}
-
-.minuteLabel {
-  color: #666;
-  font-size: 14px;
+.playerSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .selectedPlayer {
-  font-weight: 500;
-  color: #2196f3;
-}
-
-.receiverSelect {
-  flex: 1;
-  padding: 8px 12px;
+  padding: 8px;
+  background-color: #f8f9fa;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  color: #333;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.2s;
 }
 
-.receiverSelect:hover {
-  border-color: #2196f3;
-}
-
-.receiverSelect:focus {
-  outline: none;
-  border-color: #2196f3;
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-}
-
-.receiverSelect option {
+.select {
   padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }

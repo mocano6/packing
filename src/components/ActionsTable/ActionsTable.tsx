@@ -1,5 +1,3 @@
-// src/components/ActionsTable/ActionsTable.tsx
-
 import React from "react";
 import styles from "./ActionsTable.module.css";
 import { ActionsTableProps } from "./ActionsTable.types";
@@ -20,7 +18,9 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
             <th>Odbierający</th>
             <th>Numer</th>
             <th>xT Przyjęcie</th>
+            <th>Typ</th>
             <th>xT</th>
+            <th>Punkty Packing</th>
             <th>Usuń</th>
           </tr>
         </thead>
@@ -34,7 +34,9 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
               <td>{action.receiverName}</td>
               <td>{action.receiverNumber}</td>
               <td>{action.receiverClickValue}</td>
+              <td>{action.actionType === "pass" ? "Podanie" : "Drybling"}</td>
               <td>{action.totalPoints.toFixed(3)}</td>
+              <td>{action.packingPoints?.toFixed(3) || "-"}</td>
               <td className={styles.actionCell}>
                 <div
                   onClick={() => onDeleteAction(action.id)}

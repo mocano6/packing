@@ -33,6 +33,8 @@ const App: React.FC = () => {
   const [xTValue, setXTValue] = useState<number | null>(null);
   const [clickValue1, setClickValue1] = useState<number | null>(null);
   const [clickValue2, setClickValue2] = useState<number | null>(null);
+  const [actionType, setActionType] = useState<"pass" | "dribble">("pass");
+  const [isP3Active, setIsP3Active] = useState(false);
 
   const handleZoneSelect = (
     zone: number | null,
@@ -61,6 +63,8 @@ const App: React.FC = () => {
     setActionMinute(0);
     setClickValue1(null);
     setClickValue2(null);
+    setActionType("pass");
+    setIsP3Active(false);
   };
 
   const handleSavePlayer = (playerData: Omit<Player, "id">) => {
@@ -91,13 +95,25 @@ const App: React.FC = () => {
   };
 
   const handleSaveAction = () => {
-    if (!selectedPlayerId || !selectedReceiverId || selectedZone === null) {
-      alert("Wybierz nadawcę, odbiorcę i strefę boiska!");
+    if (
+      !selectedPlayerId ||
+      (!selectedReceiverId && actionType === "pass") ||
+      selectedZone === null
+    ) {
+      alert(
+        actionType === "pass"
+          ? "Wybierz nadawcę, odbiorcę i strefę boiska!"
+          : "Wybierz zawodnika i strefę boiska!"
+      );
       return;
     }
 
     const sender = players.find((p) => p.id === selectedPlayerId)!;
-    const receiver = players.find((p) => p.id === selectedReceiverId)!;
+    const receiver =
+      actionType === "pass"
+        ? players.find((p) => p.id === selectedReceiverId)!
+        : sender;
+
     const multiplier = (clickValue2 ?? 0) - (clickValue1 ?? 0);
 
     const newAction: Action = {
@@ -108,7 +124,8 @@ const App: React.FC = () => {
       senderName: sender.name,
       senderNumber: sender.number,
       senderClickValue: clickValue1 ?? 0,
-      receiverId: selectedReceiverId,
+      receiverId:
+        actionType === "pass" ? selectedReceiverId! : selectedPlayerId,
       receiverName: receiver.name,
       receiverNumber: receiver.number,
       receiverClickValue: clickValue2 ?? 0,
@@ -116,6 +133,8 @@ const App: React.FC = () => {
       basePoints: currentPoints,
       multiplier: multiplier,
       totalPoints: currentPoints * multiplier,
+      actionType: actionType,
+      packingPoints: currentPoints,
     };
 
     setActions((prev) => [...prev, newAction]);
@@ -131,7 +150,7 @@ const App: React.FC = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Packing Rate Calculator</h1>
+        <h1>Packing</h1>
       </header>
 
       <main className={styles.content}>
@@ -139,7 +158,7 @@ const App: React.FC = () => {
         <PlayersGrid
           players={players}
           selectedPlayerId={selectedPlayerId}
-          onPlayerSelect={setSelectedPlayerId}
+          onPlayerSelect={setSelectedPlayerId} // To jest kluczowe - wybór przez kliknięcie
           onAddPlayer={() => setIsModalOpen(true)}
           onEditPlayer={(id) => {
             setEditingPlayerId(id);
@@ -147,7 +166,6 @@ const App: React.FC = () => {
           }}
           onDeletePlayer={handleDeletePlayer}
         />
-
         <div className={styles.actionContainer}>
           <div className={styles.pitchContainer}>
             <FootballPitch
@@ -163,20 +181,23 @@ const App: React.FC = () => {
               onReceiverSelect={setSelectedReceiverId}
               actionMinute={actionMinute}
               onMinuteChange={setActionMinute}
+              actionType={actionType}
+              onActionTypeChange={setActionType}
             />
+
             <PointsButtons
               currentPoints={currentPoints}
               onAddPoints={(points) =>
                 setCurrentPoints((prev) => prev + points)
               }
+              isP3Active={isP3Active}
+              onP3Toggle={() => setIsP3Active((prev) => !prev)}
               onSaveAction={handleSaveAction}
               onReset={resetActionState}
             />
           </div>
         </div>
-
         <ActionsTable actions={actions} onDeleteAction={handleDeleteAction} />
-
         <PlayerModal
           isOpen={isModalOpen}
           onClose={() => {
@@ -190,7 +211,6 @@ const App: React.FC = () => {
               : undefined
           }
         />
-
         <ExportButton players={players} actions={actions} />
       </main>
     </div>

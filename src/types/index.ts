@@ -12,16 +12,18 @@ export interface Action {
   minute: number;
   senderId: string;
   senderName: string;
-  senderNumber: number; // zmienione z string na number
+  senderNumber: number;
   senderClickValue: number;
   receiverId: string;
   receiverName: string;
-  receiverNumber: number; // zmienione z string na number
+  receiverNumber: number;
   receiverClickValue: number;
   zone: number;
   basePoints: number;
   multiplier: number;
   totalPoints: number;
+  packingPoints: number;
+  actionType: "pass" | "dribble";
 }
 
 export interface PlayerStats {

@@ -1,13 +1,5 @@
 /* src/components/PointsButtons/PointsButtons.module.css */
 
-.container {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .pointsDisplay {
   display: flex;
   align-items: center;
@@ -108,4 +100,8 @@
   .controlButtons {
     flex-direction: column;
   }
+}
+.activeButton {
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
 }
