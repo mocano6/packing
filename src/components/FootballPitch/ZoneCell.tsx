@@ -1,5 +1,3 @@
-// src/components/FootballPitch/ZoneCell.tsx
-
 import React from "react";
 import styles from "./FootballPitch.module.css";
 import { ZoneCellProps } from "./FootballPitch.types";
@@ -28,7 +26,11 @@ const ZoneCell: React.FC<ZoneCellProps> = ({
         backgroundColor: getXTColor(xTValue),
       }}
     >
-      <span className={styles.xTValue}>{xTValue.toFixed(3)}</span>
+      {!isFirstSelection && !isSecondSelection && (
+        <span className={styles.xTValue}>{xTValue.toFixed(3)}</span>
+      )}
+      {isFirstSelection && <span className={styles.actionText}>PASS</span>}
+      {isSecondSelection && <span className={styles.actionText}>RECEIVE</span>}
     </div>
   );
 };

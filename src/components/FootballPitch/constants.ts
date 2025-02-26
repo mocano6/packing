@@ -1,6 +1,6 @@
 // src/components/FootballPitch/constants.ts
 
-// Wartości xT dla siatki 12x8 - najwyższe wartości w prawym środku
+// Wartości xT dla siatki 12x8
 export const XT_VALUES: number[][] = [
   [
     0.00638303, 0.00779616, 0.00844854, 0.00977659, 0.01126267, 0.01248344,

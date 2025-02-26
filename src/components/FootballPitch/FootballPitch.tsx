@@ -1,5 +1,3 @@
-// src/components/FootballPitch/FootballPitch.tsx
-
 import React, { useState } from "react";
 import styles from "./FootballPitch.module.css";
 import { FootballPitchProps } from "./FootballPitch.types";
@@ -13,8 +11,6 @@ const FootballPitch: React.FC<FootballPitchProps> = ({
   const [firstClickZone, setFirstClickZone] = useState<number | null>(null);
   const [secondClickZone, setSecondClickZone] = useState<number | null>(null);
   const [firstClickValue, setFirstClickValue] = useState<number | null>(null);
-  const [clickValue1, setClickValue1] = useState<number | null>(null);
-  const [clickValue2, setClickValue2] = useState<number | null>(null);
 
   const handleZoneClick = (zoneIndex: number) => {
     const row = Math.floor(zoneIndex / 12);
@@ -22,27 +18,20 @@ const FootballPitch: React.FC<FootballPitchProps> = ({
     const clickedValue = XT_VALUES[row][col];
 
     if (!firstClickZone) {
-      // Pierwsze kliknięcie
       setFirstClickZone(zoneIndex);
       setFirstClickValue(clickedValue);
-      setClickValue1(clickedValue);
       onZoneSelect(zoneIndex, undefined, clickedValue, undefined);
-    } else if (!secondClickZone) {
-      // Drugie kliknięcie
+    } else if (!secondClickZone && zoneIndex !== firstClickZone) {
       setSecondClickZone(zoneIndex);
-      setClickValue2(clickedValue);
       if (firstClickValue !== null) {
-        const xT = clickedValue - firstClickValue; // odwrócona kolejność
-        onZoneSelect(zoneIndex, xT, firstClickValue, clickedValue);
+        const xt = clickedValue - firstClickValue;
+        onZoneSelect(zoneIndex, xt, firstClickValue, clickedValue);
       }
     } else {
-      // Reset po drugim kliku
-      setFirstClickZone(null);
       setSecondClickZone(null);
-      setFirstClickValue(null);
-      setClickValue1(null);
-      setClickValue2(null);
-      onZoneSelect(zoneIndex);
+      setFirstClickZone(zoneIndex);
+      setFirstClickValue(clickedValue);
+      onZoneSelect(zoneIndex, undefined, clickedValue, undefined);
     }
   };
 
