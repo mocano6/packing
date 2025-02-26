@@ -1,0 +1,52 @@
+.statsContainer {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.statSection {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.statSection h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.statItem label {
+  color: #666;
+}
+
+.connections {
+  grid-column: 1 / -1;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.connection {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.connection:last-child {
+  border-bottom: none;
+}

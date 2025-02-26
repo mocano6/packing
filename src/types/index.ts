@@ -2,8 +2,7 @@
 export interface Player {
   id: string;
   name: string;
-  number: number; // upewnij się, że number jest typu number
-  // inne pola gracza...
+  number: number;
 }
 
 export interface Action {
@@ -43,3 +42,5 @@ export interface PlayerStats {
     };
   };
 }
+
+export type Tab = "packing" | "summary";

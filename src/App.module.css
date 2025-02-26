@@ -143,3 +143,26 @@
   font-size: 14px;
   margin-top: 5px;
 }
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content {
+  margin-top: 20px;
+}
+
+.packingView {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.summaryView {
+  padding: 20px;
+}
+
+.playersList {
+  margin-bottom: 20px;
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
-import { Player, Action } from "./types";
+import { Player, Action, Tab } from "./types";
 import SelectionContainer from "./components/SelectionContainer/SelectionContainer";
 import FootballPitch from "./components/FootballPitch/FootballPitch";
 import PointsButtons from "./components/PointsButtons/PointsButtons";
@@ -9,6 +9,8 @@ import PlayerModal from "./components/PlayerModal/PlayerModal";
 import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
 import Instructions from "./components/Instructions/Instructions";
 import ExportButton from "./components/ExportButton/ExportButton";
+import PlayerStats from "./components/PlayerStats/PlayerStats";
+import Tabs from "./components/Tabs/Tabs";
 
 const App: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>(() => {
@@ -21,6 +23,7 @@ const App: React.FC = () => {
     return savedActions ? JSON.parse(savedActions) : [];
   });
 
+  const [activeTab, setActiveTab] = useState<Tab>("packing");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
@@ -97,8 +100,8 @@ const App: React.FC = () => {
   const handleSaveAction = () => {
     if (
       !selectedPlayerId ||
-      (!selectedReceiverId && actionType === "pass") ||
-      selectedZone === null
+      selectedZone === null ||
+      (actionType === "pass" && !selectedReceiverId)
     ) {
       alert(
         actionType === "pass"
@@ -158,7 +161,7 @@ const App: React.FC = () => {
         <PlayersGrid
           players={players}
           selectedPlayerId={selectedPlayerId}
-          onPlayerSelect={setSelectedPlayerId} // To jest kluczowe - wybór przez kliknięcie
+          onPlayerSelect={setSelectedPlayerId}
           onAddPlayer={() => setIsModalOpen(true)}
           onEditPlayer={(id) => {
             setEditingPlayerId(id);
@@ -166,38 +169,66 @@ const App: React.FC = () => {
           }}
           onDeletePlayer={handleDeletePlayer}
         />
-        <div className={styles.actionContainer}>
-          <div className={styles.pitchContainer}>
-            <FootballPitch
-              selectedZone={selectedZone}
-              onZoneSelect={handleZoneSelect}
-            />
-          </div>
-          <div className={styles.rightContainer}>
-            <SelectionContainer
-              players={players}
-              selectedPlayerId={selectedPlayerId}
-              selectedReceiverId={selectedReceiverId}
-              onReceiverSelect={setSelectedReceiverId}
-              actionMinute={actionMinute}
-              onMinuteChange={setActionMinute}
-              actionType={actionType}
-              onActionTypeChange={setActionType}
-            />
 
-            <PointsButtons
-              currentPoints={currentPoints}
-              onAddPoints={(points) =>
-                setCurrentPoints((prev) => prev + points)
-              }
-              isP3Active={isP3Active}
-              onP3Toggle={() => setIsP3Active((prev) => !prev)}
-              onSaveAction={handleSaveAction}
-              onReset={resetActionState}
+        <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {activeTab === "packing" ? (
+          <>
+            <div className={styles.actionContainer}>
+              <div className={styles.pitchContainer}>
+                <FootballPitch
+                  selectedZone={selectedZone}
+                  onZoneSelect={handleZoneSelect}
+                />
+              </div>
+              <div className={styles.rightContainer}>
+                <SelectionContainer
+                  players={players}
+                  selectedPlayerId={selectedPlayerId}
+                  selectedReceiverId={selectedReceiverId}
+                  onReceiverSelect={setSelectedReceiverId}
+                  actionMinute={actionMinute}
+                  onMinuteChange={setActionMinute}
+                  actionType={actionType}
+                  onActionTypeChange={setActionType}
+                />
+
+                <PointsButtons
+                  currentPoints={currentPoints}
+                  onAddPoints={(points) =>
+                    setCurrentPoints((prev) => prev + points)
+                  }
+                  isP3Active={isP3Active}
+                  onP3Toggle={() => setIsP3Active((prev) => !prev)}
+                  onSaveAction={handleSaveAction}
+                  onReset={resetActionState}
+                />
+              </div>
+            </div>
+            <ActionsTable
+              actions={actions}
+              onDeleteAction={handleDeleteAction}
             />
+          </>
+        ) : (
+          <div className={styles.summaryContainer}>
+            {selectedPlayerId ? (
+              <PlayerStats
+                player={players.find((p) => p.id === selectedPlayerId)!}
+                actions={actions.filter(
+                  (a) =>
+                    a.senderId === selectedPlayerId ||
+                    a.receiverId === selectedPlayerId
+                )}
+              />
+            ) : (
+              <p className={styles.selectPlayerPrompt}>
+                Wybierz zawodnika, aby zobaczyć jego statystyki
+              </p>
+            )}
           </div>
-        </div>
-        <ActionsTable actions={actions} onDeleteAction={handleDeleteAction} />
+        )}
+
         <PlayerModal
           isOpen={isModalOpen}
           onClose={() => {
