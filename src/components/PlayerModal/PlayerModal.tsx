@@ -1,8 +1,7 @@
-// src/components/PlayerModal/PlayerModal.tsx
-
+// components/PlayerModal/PlayerModal.tsx
 import React, { useState, useEffect } from "react";
+import { Player, PlayerModalProps } from "../../types";
 import styles from "./PlayerModal.module.css";
-import { PlayerModalProps, FormData } from "./PlayerModal.types";
 
 const PlayerModal: React.FC<PlayerModalProps> = ({
   isOpen,
@@ -10,43 +9,57 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
   onSave,
   editingPlayer,
 }) => {
-  const [formData, setFormData] = useState<FormData>({
-    number: "",
+  const [formData, setFormData] = useState({
     name: "",
+    number: "",
+    position: "",
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState({
+    name: "",
+    number: "",
+    position: "",
+  });
 
   useEffect(() => {
     if (editingPlayer) {
       setFormData({
-        number: editingPlayer.number.toString(),
         name: editingPlayer.name,
+        number: editingPlayer.number.toString(),
+        position: editingPlayer.position,
       });
     } else {
       setFormData({
-        number: "",
         name: "",
+        number: "",
+        position: "",
       });
     }
-    setErrors({});
-  }, [editingPlayer, isOpen]);
+  }, [editingPlayer]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors = {
+      name: "",
+      number: "",
+      position: "",
+    };
 
-    if (!formData.number) {
+    if (!formData.name.trim()) {
+      newErrors.name = "Imię jest wymagane";
+    }
+
+    if (!formData.number.trim()) {
       newErrors.number = "Numer jest wymagany";
-    } else if (!/^\d+$/.test(formData.number)) {
+    } else if (isNaN(Number(formData.number))) {
       newErrors.number = "Numer musi być liczbą";
     }
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Nazwa jest wymagana";
+    if (!formData.position.trim()) {
+      newErrors.position = "Pozycja jest wymagana";
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !Object.values(newErrors).some((error) => error !== "");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,10 +67,10 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
 
     if (validateForm()) {
       onSave({
-        number: parseInt(formData.number),
         name: formData.name.trim(),
+        number: parseInt(formData.number),
+        position: formData.position.trim(),
       });
-      onClose();
     }
   };
 
@@ -66,69 +79,61 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2 className={styles.modalTitle}>
-          {editingPlayer ? "Edytuj zawodnika" : "Dodaj zawodnika"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <h2>{editingPlayer ? "Edytuj zawodnika" : "Dodaj zawodnika"}</h2>
+        <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="number" className={styles.label}>
-              Numer:
-            </label>
-            <input
-              type="text"
-              id="number"
-              value={formData.number}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  number: e.target.value,
-                }))
-              }
-              className={`${styles.input} ${errors.number ? styles.error : ""}`}
-              placeholder="Np. 10"
-              autoFocus
-            />
-            {errors.number && (
-              <span className={styles.errorMessage}>{errors.number}</span>
-            )}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="name" className={styles.label}>
-              Nazwa:
-            </label>
+            <label htmlFor="name">Imię i nazwisko:</label>
             <input
               type="text"
               id="name"
               value={formData.name}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  name: e.target.value,
-                }))
+                setFormData({ ...formData, name: e.target.value })
               }
-              className={`${styles.input} ${errors.name ? styles.error : ""}`}
-              placeholder="Imię i nazwisko"
             />
-            {errors.name && (
-              <span className={styles.errorMessage}>{errors.name}</span>
+            {errors.name && <span className={styles.error}>{errors.name}</span>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="number">Numer:</label>
+            <input
+              type="text"
+              id="number"
+              value={formData.number}
+              onChange={(e) =>
+                setFormData({ ...formData, number: e.target.value })
+              }
+            />
+            {errors.number && (
+              <span className={styles.error}>{errors.number}</span>
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="position">Pozycja:</label>
+            <input
+              type="text"
+              id="position"
+              value={formData.position}
+              onChange={(e) =>
+                setFormData({ ...formData, position: e.target.value })
+              }
+            />
+            {errors.position && (
+              <span className={styles.error}>{errors.position}</span>
             )}
           </div>
 
           <div className={styles.buttonGroup}>
+            <button type="submit" className={styles.saveButton}>
+              Zapisz
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className={`${styles.button} ${styles.cancelButton}`}
+              className={styles.cancelButton}
             >
               Anuluj
-            </button>
-            <button
-              type="submit"
-              className={`${styles.button} ${styles.saveButton}`}
-            >
-              {editingPlayer ? "Zapisz zmiany" : "Dodaj"}
             </button>
           </div>
         </form>

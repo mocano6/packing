@@ -1,16 +1,15 @@
+// App.tsx
 import React, { useState, useEffect } from "react";
-import styles from "./App.module.css";
 import { Player, Action, Tab } from "./types";
-import SelectionContainer from "./components/SelectionContainer/SelectionContainer";
-import FootballPitch from "./components/FootballPitch/FootballPitch";
-import PointsButtons from "./components/PointsButtons/PointsButtons";
+import Instructions from "./components/Instructions/Instructions";
+import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
+import Tabs from "./components/Tabs/Tabs";
+import ActionSection from "./components/ActionSection/ActionSection";
+import SummarySection from "./components/SummarySection/SummarySection";
 import ActionsTable from "./components/ActionsTable/ActionsTable";
 import PlayerModal from "./components/PlayerModal/PlayerModal";
-import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
-import Instructions from "./components/Instructions/Instructions";
 import ExportButton from "./components/ExportButton/ExportButton";
-import PlayerStats from "./components/PlayerStats/PlayerStats";
-import Tabs from "./components/Tabs/Tabs";
+import styles from "./App.module.css";
 
 const App: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>(() => {
@@ -33,23 +32,10 @@ const App: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<number | null>(null);
   const [currentPoints, setCurrentPoints] = useState(0);
   const [actionMinute, setActionMinute] = useState<number>(0);
-  const [xTValue, setXTValue] = useState<number | null>(null);
-  const [clickValue1, setClickValue1] = useState<number | null>(null);
-  const [clickValue2, setClickValue2] = useState<number | null>(null);
   const [actionType, setActionType] = useState<"pass" | "dribble">("pass");
   const [isP3Active, setIsP3Active] = useState(false);
-
-  const handleZoneSelect = (
-    zone: number | null,
-    xT?: number,
-    value1?: number,
-    value2?: number
-  ) => {
-    setSelectedZone(zone);
-    if (xT !== undefined) setXTValue(xT);
-    if (value1 !== undefined) setClickValue1(value1);
-    if (value2 !== undefined) setClickValue2(value2);
-  };
+  const [clickValue1, setClickValue1] = useState<number | null>(null);
+  const [clickValue2, setClickValue2] = useState<number | null>(null);
 
   useEffect(() => {
     localStorage.setItem("players", JSON.stringify(players));
@@ -59,23 +45,34 @@ const App: React.FC = () => {
     localStorage.setItem("actions", JSON.stringify(actions));
   }, [actions]);
 
-  const resetActionState = () => {
-    setSelectedReceiverId(null);
-    setSelectedZone(null);
-    setCurrentPoints(0);
-    setActionMinute(0);
-    setClickValue1(null);
-    setClickValue2(null);
-    setActionType("pass");
-    setIsP3Active(false);
+  const handleZoneSelect = (
+    zone: number | null,
+    xT?: number,
+    value1?: number,
+    value2?: number
+  ) => {
+    setSelectedZone(zone);
+    if (value1 !== undefined) setClickValue1(value1);
+    if (value2 !== undefined) setClickValue2(value2);
+  };
+
+  const handleDeletePlayer = (playerId: string) => {
+    if (window.confirm("Czy na pewno chcesz usunąć tego zawodnika?")) {
+      setPlayers((prev) => prev.filter((p) => p.id !== playerId));
+      if (selectedPlayerId === playerId) {
+        setSelectedPlayerId(null);
+        resetActionState();
+      }
+    }
   };
 
   const handleSavePlayer = (playerData: Omit<Player, "id">) => {
     if (editingPlayerId) {
-      const updatedPlayers = players.map((player) =>
-        player.id === editingPlayerId ? { ...player, ...playerData } : player
+      setPlayers(
+        players.map((player) =>
+          player.id === editingPlayerId ? { ...player, ...playerData } : player
+        )
       );
-      setPlayers(updatedPlayers);
     } else {
       const newPlayer: Player = {
         id: crypto.randomUUID(),
@@ -87,14 +84,21 @@ const App: React.FC = () => {
     setEditingPlayerId(null);
   };
 
-  const handleDeletePlayer = (playerId: string) => {
-    if (window.confirm("Czy na pewno chcesz usunąć tego zawodnika?")) {
-      setPlayers((prev) => prev.filter((p) => p.id !== playerId));
-      if (selectedPlayerId === playerId) {
-        setSelectedPlayerId(null);
-        resetActionState();
-      }
+  const handleDeleteAction = (actionId: string) => {
+    if (window.confirm("Czy na pewno chcesz usunąć tę akcję?")) {
+      setActions((prev) => prev.filter((action) => action.id !== actionId));
     }
+  };
+
+  const resetActionState = () => {
+    setSelectedReceiverId(null);
+    setSelectedZone(null);
+    setCurrentPoints(0);
+    setActionMinute(0);
+    setClickValue1(null);
+    setClickValue2(null);
+    setActionType("pass");
+    setIsP3Active(false);
   };
 
   const handleSaveAction = () => {
@@ -135,19 +139,14 @@ const App: React.FC = () => {
       zone: selectedZone,
       basePoints: currentPoints,
       multiplier: multiplier,
-      totalPoints: currentPoints * multiplier,
+      totalPoints: currentPoints * multiplier, // to może być używane do innych celów
       actionType: actionType,
-      packingPoints: currentPoints,
+      packingPoints: currentPoints, // punkty za packing
+      xTValue: currentPoints * multiplier, // zapisujemy wartość xT w odpowiednim polu
     };
 
     setActions((prev) => [...prev, newAction]);
     resetActionState();
-  };
-
-  const handleDeleteAction = (actionId: string) => {
-    if (window.confirm("Czy na pewno chcesz usunąć tę akcję?")) {
-      setActions((prev) => prev.filter((action) => action.id !== actionId));
-    }
   };
 
   return (
@@ -174,59 +173,35 @@ const App: React.FC = () => {
 
         {activeTab === "packing" ? (
           <>
-            <div className={styles.actionContainer}>
-              <div className={styles.pitchContainer}>
-                <FootballPitch
-                  selectedZone={selectedZone}
-                  onZoneSelect={handleZoneSelect}
-                />
-              </div>
-              <div className={styles.rightContainer}>
-                <SelectionContainer
-                  players={players}
-                  selectedPlayerId={selectedPlayerId}
-                  selectedReceiverId={selectedReceiverId}
-                  onReceiverSelect={setSelectedReceiverId}
-                  actionMinute={actionMinute}
-                  onMinuteChange={setActionMinute}
-                  actionType={actionType}
-                  onActionTypeChange={setActionType}
-                />
-
-                <PointsButtons
-                  currentPoints={currentPoints}
-                  onAddPoints={(points) =>
-                    setCurrentPoints((prev) => prev + points)
-                  }
-                  isP3Active={isP3Active}
-                  onP3Toggle={() => setIsP3Active((prev) => !prev)}
-                  onSaveAction={handleSaveAction}
-                  onReset={resetActionState}
-                />
-              </div>
-            </div>
+            <ActionSection
+              selectedZone={selectedZone}
+              handleZoneSelect={handleZoneSelect}
+              players={players}
+              selectedPlayerId={selectedPlayerId}
+              selectedReceiverId={selectedReceiverId}
+              setSelectedReceiverId={setSelectedReceiverId}
+              actionMinute={actionMinute}
+              setActionMinute={setActionMinute}
+              actionType={actionType}
+              setActionType={setActionType}
+              currentPoints={currentPoints}
+              setCurrentPoints={setCurrentPoints}
+              isP3Active={isP3Active}
+              setIsP3Active={setIsP3Active}
+              handleSaveAction={handleSaveAction}
+              resetActionState={resetActionState}
+            />
             <ActionsTable
               actions={actions}
               onDeleteAction={handleDeleteAction}
             />
           </>
         ) : (
-          <div className={styles.summaryContainer}>
-            {selectedPlayerId ? (
-              <PlayerStats
-                player={players.find((p) => p.id === selectedPlayerId)!}
-                actions={actions.filter(
-                  (a) =>
-                    a.senderId === selectedPlayerId ||
-                    a.receiverId === selectedPlayerId
-                )}
-              />
-            ) : (
-              <p className={styles.selectPlayerPrompt}>
-                Wybierz zawodnika, aby zobaczyć jego statystyki
-              </p>
-            )}
-          </div>
+          <SummarySection
+            selectedPlayerId={selectedPlayerId}
+            players={players}
+            actions={actions}
+          />
         )}
 
         <PlayerModal

@@ -1,6 +1,6 @@
-import React from "react";
-import styles from "./PlayerStats.module.css";
+import React, { useMemo } from "react";
 import { Player, Action, PlayerStats as PlayerStatsType } from "../../types";
+import styles from "./PlayerStats.module.css";
 
 interface PlayerStatsProps {
   player: Player;
@@ -8,116 +8,111 @@ interface PlayerStatsProps {
 }
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
-  const calculatePlayerStats = (
-    player: Player,
-    actions: Action[]
-  ): PlayerStatsType => {
+  const playerStats = useMemo(() => {
     const stats: PlayerStatsType = {
-      name: player.name,
-      number: player.number.toString(),
-      totalPointsAsSender: 0,
-      totalPointsAsReceiver: 0,
-      actionsAsSender: 0,
-      actionsAsReceiver: 0,
-      avgPointsAsSender: 0,
-      avgPointsAsReceiver: 0,
+      totalActions: 0,
+      totalPoints: 0,
+      totalXT: 0,
+      packingAsSender: 0,
+      packingAsReceiver: 0,
+      xtAsSender: 0,
+      xtAsReceiver: 0,
+      averagePoints: 0,
+      averageXT: 0,
       connections: {},
     };
 
     actions.forEach((action) => {
-      if (action.senderId === player.id) {
-        stats.totalPointsAsSender += action.totalPoints;
-        stats.actionsAsSender++;
+      stats.totalActions++;
+      stats.totalPoints += action.packingPoints;
+      stats.totalXT += action.totalPoints;
 
-        // Update connections for sender
-        if (action.actionType === "pass") {
-          const receiverId = action.receiverId;
-          if (!stats.connections[receiverId]) {
-            stats.connections[receiverId] = {
-              count: 0,
-              totalPoints: 0,
-              playerName: action.receiverName,
-            };
-          }
-          stats.connections[receiverId].count++;
-          stats.connections[receiverId].totalPoints += action.totalPoints;
+      if (action.senderId === player.id) {
+        stats.packingAsSender += action.packingPoints;
+        stats.xtAsSender += action.totalPoints;
+        const receiverId = action.receiverId;
+        if (!stats.connections[receiverId]) {
+          stats.connections[receiverId] = {
+            playerName: action.receiverName,
+            count: 0,
+            totalPoints: 0,
+            totalXT: 0,
+          };
         }
+        stats.connections[receiverId].count++;
+        stats.connections[receiverId].totalPoints += action.packingPoints;
+        stats.connections[receiverId].totalXT += action.totalPoints;
       }
 
       if (action.receiverId === player.id) {
-        stats.totalPointsAsReceiver += action.totalPoints;
-        stats.actionsAsReceiver++;
+        stats.packingAsReceiver += action.packingPoints;
+        stats.xtAsReceiver += action.totalPoints;
       }
     });
 
-    // Calculate averages
-    stats.avgPointsAsSender =
-      stats.actionsAsSender > 0
-        ? stats.totalPointsAsSender / stats.actionsAsSender
-        : 0;
-    stats.avgPointsAsReceiver =
-      stats.actionsAsReceiver > 0
-        ? stats.totalPointsAsReceiver / stats.actionsAsReceiver
-        : 0;
+    stats.averagePoints =
+      stats.totalActions > 0 ? stats.totalPoints / stats.totalActions : 0;
+    stats.averageXT =
+      stats.totalActions > 0 ? stats.totalXT / stats.totalActions : 0;
 
     return stats;
-  };
-
-  const playerStats = calculatePlayerStats(player, actions);
+  }, [player, actions]);
 
   return (
     <div className={styles.statsContainer}>
       <h3>
-        {player.name} (#{player.number})
+        {player.name} #{player.number}
       </h3>
       <div className={styles.statsGrid}>
-        <div className={styles.statSection}>
-          <h4>Jako nadawca</h4>
-          <div className={styles.statItem}>
-            <label>Liczba akcji:</label>
-            <span>{playerStats.actionsAsSender}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Suma punktów:</label>
-            <span>{playerStats.totalPointsAsSender.toFixed(2)}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Średnio punktów:</label>
-            <span>{playerStats.avgPointsAsSender.toFixed(2)}</span>
-          </div>
+        <div className={styles.statItem}>
+          <label>Suma punktów (Packing):</label>
+          <span>{playerStats.totalPoints}</span>
         </div>
-
-        <div className={styles.statSection}>
-          <h4>Jako odbiorca</h4>
-          <div className={styles.statItem}>
-            <label>Liczba akcji:</label>
-            <span>{playerStats.actionsAsReceiver}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Suma punktów:</label>
-            <span>{playerStats.totalPointsAsReceiver.toFixed(2)}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Średnio punktów:</label>
-            <span>{playerStats.avgPointsAsReceiver.toFixed(2)}</span>
-          </div>
+        <div className={styles.statItem}>
+          <label>Suma xT:</label>
+          <span>{playerStats.totalXT.toFixed(4)}</span>
         </div>
-
-        {Object.keys(playerStats.connections).length > 0 && (
-          <div className={styles.connections}>
-            <h4>Połączenia z innymi zawodnikami</h4>
-            {Object.entries(playerStats.connections)
-              .sort(([, a], [, b]) => b.totalPoints - a.totalPoints)
-              .map(([playerId, connection]) => (
-                <div key={playerId} className={styles.connection}>
-                  <span>{connection.playerName}</span>
-                  <span>{connection.count} akcji</span>
-                  <span>{connection.totalPoints.toFixed(2)} pkt</span>
-                </div>
-              ))}
-          </div>
-        )}
+        <div className={styles.statItem}>
+          <label>Średnio punktów (Packing):</label>
+          <span>{playerStats.averagePoints.toFixed(1)}</span>
+        </div>
+        <div className={styles.statItem}>
+          <label>Średnio xT:</label>
+          <span>{playerStats.averageXT.toFixed(4)}</span>
+        </div>
+        <div className={styles.statItem}>
+          <label>Packing jako nadawca:</label>
+          <span>{playerStats.packingAsSender}</span>
+        </div>
+        <div className={styles.statItem}>
+          <label>Packing jako odbiorca:</label>
+          <span>{playerStats.packingAsReceiver}</span>
+        </div>
+        <div className={styles.statItem}>
+          <label>xT jako nadawca:</label>
+          <span>{playerStats.xtAsSender.toFixed(4)}</span>
+        </div>
+        <div className={styles.statItem}>
+          <label>xT jako odbiorca:</label>
+          <span>{playerStats.xtAsReceiver.toFixed(4)}</span>
+        </div>
       </div>
+
+      {playerStats.packingAsSender > 0 && (
+        <div className={styles.connections}>
+          <h4>Połączenia z innymi zawodnikami (do kogo podaje)</h4>
+          {Object.entries(playerStats.connections)
+            .sort(([, a], [, b]) => b.totalPoints - a.totalPoints)
+            .map(([playerId, connection]) => (
+              <div key={playerId} className={styles.connection}>
+                <span>{connection.playerName}</span>
+                <span>{connection.count} akcji</span>
+                <span>{connection.totalPoints} pkt (Packing)</span>
+                <span>{connection.totalXT.toFixed(4)} xT</span>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };
