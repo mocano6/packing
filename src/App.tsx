@@ -94,7 +94,6 @@ const App: React.FC = () => {
     setSelectedReceiverId(null);
     setSelectedZone(null);
     setCurrentPoints(0);
-    setActionMinute(0);
     setClickValue1(null);
     setClickValue2(null);
     setActionType("pass");
@@ -139,10 +138,11 @@ const App: React.FC = () => {
       zone: selectedZone,
       basePoints: currentPoints,
       multiplier: multiplier,
-      totalPoints: currentPoints * multiplier, // to może być używane do innych celów
+      totalPoints: currentPoints * multiplier,
       actionType: actionType,
-      packingPoints: currentPoints, // punkty za packing
-      xTValue: currentPoints * multiplier, // zapisujemy wartość xT w odpowiednim polu
+      packingPoints: currentPoints,
+      xTValue: currentPoints * multiplier,
+      isP3: isP3Active,
     };
 
     setActions((prev) => [...prev, newAction]);

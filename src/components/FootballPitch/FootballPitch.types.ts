@@ -1,7 +1,5 @@
 // src/components/FootballPitch/FootballPitch.types.ts
 
-// src/components/FootballPitch/FootballPitch.types.ts
-
 export interface FootballPitchProps {
   selectedZone: number | null;
   onZoneSelect: (

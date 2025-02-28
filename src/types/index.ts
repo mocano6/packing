@@ -17,6 +17,7 @@ export interface PlayerStats {
   xtAsReceiver: number;
   averagePoints: number;
   averageXT: number;
+  totalP3: number;
   connections: {
     [key: string]: {
       playerName: string;
@@ -33,7 +34,6 @@ export interface PlayerConnection {
   totalPoints: number;
   totalXT: number;
 }
-
 export interface Action {
   id: string;
   timestamp: string;
@@ -51,9 +51,11 @@ export interface Action {
   multiplier: number;
   totalPoints: number;
   actionType: "pass" | "dribble";
-  packingPoints: number;
-  xTValue?: number; // dodane
+  packingPoints?: number;
+  xTValue?: number;
+  isP3?: boolean; // Dodane pole isP3
 }
+
 export interface ActionSectionProps {
   selectedZone: number | null;
   handleZoneSelect: (
