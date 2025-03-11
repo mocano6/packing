@@ -55,11 +55,12 @@ export interface Action {
   multiplier: number;
   totalPoints: number;
   actionType: "pass" | "dribble";
-  packingPoints?: number;
-  xTValue?: number;
-  isP3?: boolean;
+  packingPoints: number;
+  xTValue: number;
+  isP3: boolean;
   isShot: boolean;
   isGoal: boolean;
+  matchInfo?: TeamInfo;
 }
 
 export interface ActionSectionProps {
@@ -104,4 +105,22 @@ export interface PlayerModalProps {
 export interface PlayerStatsProps {
   player: Player;
   actions: Action[];
+}
+export interface Player {
+  id: string;
+  name: string;
+  number: number;
+  position: string;
+  birthYear?: number;
+  imageUrl?: string;
+}
+
+export interface TeamInfo {
+  matchId: string;
+  team: string;
+  opponent: string;
+  isHome: boolean;
+  competition: string;
+  date: string;
+  time: string;
 }

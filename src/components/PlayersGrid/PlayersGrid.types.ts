@@ -1,20 +1,19 @@
 // src/components/PlayersGrid/PlayersGrid.types.ts
-
 import { Player } from "../../types";
 
 export interface PlayersGridProps {
   players: Player[];
   selectedPlayerId: string | null;
-  onPlayerSelect: (playerId: string) => void;
+  onPlayerSelect: (id: string) => void;
   onAddPlayer: () => void;
-  onEditPlayer: (playerId: string) => void;
-  onDeletePlayer: (playerId: string) => void;
+  onEditPlayer: (id: string) => void;
+  onDeletePlayer: (id: string) => void;
 }
 
 export interface PlayerTileProps {
   player: Player;
   isSelected: boolean;
-  onSelect: (playerId: string) => void;
-  onEdit: (playerId: string) => void;
-  onDelete: (playerId: string) => void;
+  onSelect: (id: string) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }

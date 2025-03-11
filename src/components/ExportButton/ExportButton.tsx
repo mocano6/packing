@@ -1,41 +1,59 @@
-// src/components/ExportButton/ExportButton.tsx
+// components/ExportButton/ExportButton.tsx
 import React from "react";
 import { Player, Action } from "../../types";
 import styles from "./ExportButton.module.css";
 
+interface TeamInfo {
+  matchId: string;
+  team: string;
+  opponent: string;
+  isHome: boolean;
+  competition: string;
+  date: string;
+  time: string;
+}
+
 interface ExportButtonProps {
   players: Player[];
   actions: Action[];
+  matchInfo: TeamInfo | null;
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({ players, actions }) => {
-  const handleExportData = () => {
-    const exportData = {
-      players,
-      actions,
-      exportDate: new Date().toISOString(),
+const ExportButton: React.FC<ExportButtonProps> = ({
+  players,
+  actions,
+  matchInfo,
+}) => {
+  const handleExport = () => {
+    // Jeśli nie ma informacji o meczu, tworzymy obiekt z ID
+    const matchData = matchInfo || {
+      matchId: crypto.randomUUID(),
+      note: "Brak szczegółowych informacji o meczu",
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = window.URL.createObjectURL(blob);
+    const data = {
+      exportDate: new Date().toISOString(),
+      matchInfo: matchData,
+      players,
+      actions,
+    };
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `packing-rate-data-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-    document.body.appendChild(link);
-    link.click();
+    const exportFileDefaultName = matchInfo
+      ? `packing_${matchInfo.team}_vs_${matchInfo.opponent}_${matchInfo.date}.json`
+      : "packing_data.json";
 
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
   };
 
   return (
-    <button className={styles.exportButton} onClick={handleExportData}>
+    <button className={styles.exportButton} onClick={handleExport}>
       Eksportuj dane do JSON
     </button>
   );

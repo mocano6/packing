@@ -1,6 +1,5 @@
-// App.tsx
-import React, { useState, useEffect } from "react";
-import { Player, Action, Tab } from "./types";
+import React, { useEffect } from "react";
+import { Tab } from "./types";
 import Instructions from "./components/Instructions/Instructions";
 import PlayersGrid from "./components/PlayersGrid/PlayersGrid";
 import Tabs from "./components/Tabs/Tabs";
@@ -9,165 +8,102 @@ import SummarySection from "./components/SummarySection/SummarySection";
 import ActionsTable from "./components/ActionsTable/ActionsTable";
 import PlayerModal from "./components/PlayerModal/PlayerModal";
 import ExportButton from "./components/ExportButton/ExportButton";
+import MatchInfoModal from "./components/MatchInfoModal/MatchInfoModal";
+import MatchInfoHeader from "./components/MatchInfoHeader/MatchInfoHeader";
+import { usePlayersState } from "./hooks/usePlayersState";
+import { useActionsState } from "./hooks/useActionsState";
+import { useMatchInfo } from "./hooks/useMatchInfo";
 import styles from "./App.module.css";
 
 const App: React.FC = () => {
-  const [players, setPlayers] = useState<Player[]>(() => {
-    const savedPlayers = localStorage.getItem("players");
-    return savedPlayers ? JSON.parse(savedPlayers) : [];
-  });
+  const [activeTab, setActiveTab] = React.useState<Tab>("packing");
 
-  const [actions, setActions] = useState<Action[]>(() => {
-    const savedActions = localStorage.getItem("actions");
-    return savedActions ? JSON.parse(savedActions) : [];
-  });
+  // Custom hooks
+  const {
+    players,
+    isModalOpen,
+    editingPlayerId,
+    setIsModalOpen,
+    handleDeletePlayer,
+    handleSavePlayer,
+    handleEditPlayer,
+    closeModal,
+  } = usePlayersState();
 
-  const [activeTab, setActiveTab] = useState<Tab>("packing");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
-  const [selectedReceiverId, setSelectedReceiverId] = useState<string | null>(
-    null
-  );
-  const [selectedZone, setSelectedZone] = useState<number | null>(null);
-  const [currentPoints, setCurrentPoints] = useState(0);
-  const [actionMinute, setActionMinute] = useState<number>(0);
-  const [actionType, setActionType] = useState<"pass" | "dribble">("pass");
-  const [isP3Active, setIsP3Active] = useState(false);
-  const [isShot, setIsShot] = useState(false);
-  const [isGoal, setIsGoal] = useState(false);
-  const [clickValue1, setClickValue1] = useState<number | null>(null);
-  const [clickValue2, setClickValue2] = useState<number | null>(null);
+  const {
+    matchInfo,
+    isMatchModalOpen,
+    setIsMatchModalOpen,
+    handleSaveMatchInfo,
+  } = useMatchInfo();
 
+  const {
+    actions,
+    selectedPlayerId,
+    selectedReceiverId,
+    selectedZone,
+    currentPoints,
+    actionMinute,
+    actionType,
+    isP3Active,
+    isShot,
+    isGoal,
+    setSelectedPlayerId,
+    setSelectedReceiverId,
+    setCurrentPoints,
+    setActionMinute,
+    setActionType,
+    setIsP3Active,
+    setIsShot,
+    setIsGoal,
+    handleZoneSelect,
+    handleSaveAction,
+    handleDeleteAction,
+    handleDeleteAllActions,
+    resetActionState,
+  } = useActionsState(players);
+
+  // Jeśli nie mamy informacji o meczu, pokaż modal przy wejściu na zakładkę packing
   useEffect(() => {
-    localStorage.setItem("players", JSON.stringify(players));
-  }, [players]);
-
-  useEffect(() => {
-    localStorage.setItem("actions", JSON.stringify(actions));
-  }, [actions]);
-  const handleDeleteAllActions = () => {
-    if (
-      window.confirm(
-        "Czy na pewno chcesz usunąć wszystkie akcje? Tej operacji nie można cofnąć."
-      )
-    ) {
-      setActions([]);
+    if (!matchInfo && activeTab === "packing") {
+      setIsMatchModalOpen(true);
     }
-  };
-  const handleZoneSelect = (
-    zone: number | null,
-    xT?: number,
-    value1?: number,
-    value2?: number
-  ) => {
-    setSelectedZone(zone);
-    if (value1 !== undefined) setClickValue1(value1);
-    if (value2 !== undefined) setClickValue2(value2);
-  };
+  }, [activeTab, matchInfo, setIsMatchModalOpen]);
 
-  const handleDeletePlayer = (playerId: string) => {
-    if (window.confirm("Czy na pewno chcesz usunąć tego zawodnika?")) {
-      setPlayers((prev) => prev.filter((p) => p.id !== playerId));
-      if (selectedPlayerId === playerId) {
-        setSelectedPlayerId(null);
-        resetActionState();
-      }
+  // Handler dla usuwania gracza, który resetuje wybór, jeśli usuwany gracz jest aktualnie wybrany
+  const onDeletePlayer = (playerId: string) => {
+    const wasDeleted = handleDeletePlayer(playerId);
+    if (wasDeleted && selectedPlayerId === playerId) {
+      setSelectedPlayerId(null);
+      resetActionState();
     }
   };
 
-  const handleSavePlayer = (playerData: Omit<Player, "id">) => {
-    if (editingPlayerId) {
-      setPlayers(
-        players.map((player) =>
-          player.id === editingPlayerId ? { ...player, ...playerData } : player
-        )
-      );
-    } else {
-      const newPlayer: Player = {
-        id: crypto.randomUUID(),
-        ...playerData,
-      };
-      setPlayers((prev) => [...prev, newPlayer]);
-    }
-    setIsModalOpen(false);
-    setEditingPlayerId(null);
-  };
+  // Handler dla zapisu akcji, który sprawdza czy mamy informacje o meczu
+  const onSaveAction = () => {
+    const canSave = handleSaveAction(matchInfo);
 
-  const handleDeleteAction = (actionId: string) => {
-    if (window.confirm("Czy na pewno chcesz usunąć tę akcję?")) {
-      setActions((prev) => prev.filter((action) => action.id !== actionId));
+    if (!canSave && !matchInfo) {
+      setIsMatchModalOpen(true);
     }
   };
 
-  const resetActionState = () => {
-    setSelectedReceiverId(null);
-    setSelectedZone(null);
-    setCurrentPoints(0);
-    setClickValue1(null);
-    setClickValue2(null);
-    setActionType("pass");
-    setIsP3Active(false);
-    setIsShot(false);
-    setIsGoal(false);
-  };
-
-  const handleSaveAction = () => {
-    if (
-      !selectedPlayerId ||
-      selectedZone === null ||
-      (actionType === "pass" && !selectedReceiverId)
-    ) {
-      alert(
-        actionType === "pass"
-          ? "Wybierz nadawcę, odbiorcę i strefę boiska!"
-          : "Wybierz zawodnika i strefę boiska!"
-      );
-      return;
+  // Handler dla usunięcia wszystkich akcji, który także resetuje informacje o meczu
+  const onDeleteAllActions = () => {
+    const wasDeleted = handleDeleteAllActions();
+    if (wasDeleted) {
+      // Resetowanie informacji o meczu
+      setIsMatchModalOpen(true);
     }
-
-    const sender = players.find((p) => p.id === selectedPlayerId)!;
-    const receiver =
-      actionType === "pass"
-        ? players.find((p) => p.id === selectedReceiverId)!
-        : sender;
-
-    const multiplier = (clickValue2 ?? 0) - (clickValue1 ?? 0);
-
-    const newAction: Action = {
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      minute: actionMinute,
-      senderId: selectedPlayerId,
-      senderName: sender.name,
-      senderNumber: sender.number,
-      senderClickValue: clickValue1 ?? 0,
-      receiverId:
-        actionType === "pass" ? selectedReceiverId! : selectedPlayerId,
-      receiverName: receiver.name,
-      receiverNumber: receiver.number,
-      receiverClickValue: clickValue2 ?? 0,
-      zone: selectedZone,
-      basePoints: currentPoints,
-      multiplier: multiplier,
-      totalPoints: currentPoints * multiplier,
-      actionType: actionType,
-      packingPoints: currentPoints,
-      xTValue: currentPoints * multiplier,
-      isP3: isP3Active,
-      isShot: isShot,
-      isGoal: isGoal,
-    };
-
-    setActions((prev) => [...prev, newAction]);
-    resetActionState();
   };
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>Packing</h1>
-      </header>
+      {/* Nagłówek z informacjami o meczu */}
+      <MatchInfoHeader
+        matchInfo={matchInfo}
+        onChangeMatch={() => setIsMatchModalOpen(true)}
+      />
 
       <main className={styles.content}>
         <Instructions />
@@ -176,11 +112,8 @@ const App: React.FC = () => {
           selectedPlayerId={selectedPlayerId}
           onPlayerSelect={setSelectedPlayerId}
           onAddPlayer={() => setIsModalOpen(true)}
-          onEditPlayer={(id) => {
-            setEditingPlayerId(id);
-            setIsModalOpen(true);
-          }}
-          onDeletePlayer={handleDeletePlayer}
+          onEditPlayer={handleEditPlayer}
+          onDeletePlayer={onDeletePlayer}
         />
 
         <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -206,13 +139,13 @@ const App: React.FC = () => {
               setIsShot={setIsShot}
               isGoal={isGoal}
               setIsGoal={setIsGoal}
-              handleSaveAction={handleSaveAction}
+              handleSaveAction={onSaveAction}
               resetActionState={resetActionState}
             />
             <ActionsTable
               actions={actions}
               onDeleteAction={handleDeleteAction}
-              onDeleteAllActions={handleDeleteAllActions}
+              onDeleteAllActions={onDeleteAllActions}
             />
           </>
         ) : (
@@ -225,10 +158,7 @@ const App: React.FC = () => {
 
         <PlayerModal
           isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setEditingPlayerId(null);
-          }}
+          onClose={closeModal}
           onSave={handleSavePlayer}
           editingPlayer={
             editingPlayerId
@@ -236,7 +166,20 @@ const App: React.FC = () => {
               : undefined
           }
         />
-        <ExportButton players={players} actions={actions} />
+
+        {/* Modal do wyboru informacji o meczu */}
+        <MatchInfoModal
+          isOpen={isMatchModalOpen}
+          onClose={() => setIsMatchModalOpen(false)}
+          onSave={handleSaveMatchInfo}
+          currentInfo={matchInfo}
+        />
+
+        <ExportButton
+          players={players}
+          actions={actions}
+          matchInfo={matchInfo}
+        />
       </main>
     </div>
   );
