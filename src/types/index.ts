@@ -7,6 +7,13 @@ export interface Player {
   number: number;
   position: string;
 }
+export interface ConnectionStats {
+  playerName: string;
+  count: number;
+  totalPoints: number;
+  totalXT: number;
+}
+
 export interface PlayerStats {
   totalActions: number;
   totalPoints: number;
@@ -18,14 +25,11 @@ export interface PlayerStats {
   averagePoints: number;
   averageXT: number;
   totalP3: number;
-  connections: {
-    [key: string]: {
-      playerName: string;
-      count: number;
-      totalPoints: number;
-      totalXT: number;
-    };
-  };
+  connections: { [key: string]: ConnectionStats }; // Zachowujemy dla kompatybilności
+  connectionsAsSender: { [key: string]: ConnectionStats };
+  connectionsAsReceiver: { [key: string]: ConnectionStats };
+  totalShots: number;
+  totalGoals: number;
 }
 
 export interface PlayerConnection {

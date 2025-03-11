@@ -125,3 +125,13 @@
   border-radius: 8px;
   color: #666;
 }
+/* Dodaj do pliku PlayerStats.module.css */
+.sortableHeader {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.sortableHeader:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}

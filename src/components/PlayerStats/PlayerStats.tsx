@@ -15,7 +15,28 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
     averagePoints: 0,
     averageXT: 0,
     totalP3: 0,
-    connections: {},
+    totalShots: 0,
+    totalGoals: 0,
+    connections: {}, // Zachowujemy dla kompatybilności
+    connectionsAsSender: {},
+    connectionsAsReceiver: {},
+  });
+
+  // Stan dla sortowania
+  const [senderSortConfig, setSenderSortConfig] = useState<{
+    key: string;
+    direction: "ascending" | "descending";
+  }>({
+    key: "count",
+    direction: "descending",
+  });
+
+  const [receiverSortConfig, setReceiverSortConfig] = useState<{
+    key: string;
+    direction: "ascending" | "descending";
+  }>({
+    key: "count",
+    direction: "descending",
   });
 
   useEffect(() => {
@@ -30,7 +51,11 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
       averagePoints: 0,
       averageXT: 0,
       totalP3: 0,
-      connections: {},
+      totalShots: 0,
+      totalGoals: 0,
+      connections: {}, // Zachowujemy dla kompatybilności
+      connectionsAsSender: {},
+      connectionsAsReceiver: {},
     };
 
     actions.forEach((action) => {
@@ -43,26 +68,81 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
         stats.totalP3++;
       }
 
+      // Zliczanie strzałów
+      if (action.senderId === player.id && action.isShot) {
+        stats.totalShots++;
+      }
+
+      // Zliczanie bramek
+      if (action.senderId === player.id && action.isGoal) {
+        stats.totalGoals++;
+      }
+
+      // Połączenia jako podający (sender)
       if (action.senderId === player.id) {
         stats.packingAsSender += action.packingPoints ?? 0;
         stats.xtAsSender += action.totalPoints;
+
         const receiverId = action.receiverId;
-        if (!stats.connections[receiverId]) {
-          stats.connections[receiverId] = {
-            playerName: `${action.receiverNumber}-${action.receiverName}`,
-            count: 0,
-            totalPoints: 0,
-            totalXT: 0,
-          };
+        if (receiverId) {
+          // Upewnij się, że receiverId istnieje
+          // Dla kompatybilności z istniejącym interfejsem
+          if (!stats.connections[receiverId]) {
+            stats.connections[receiverId] = {
+              playerName: `${action.receiverNumber || ""}-${
+                action.receiverName || ""
+              }`,
+              count: 0,
+              totalPoints: 0,
+              totalXT: 0,
+            };
+          }
+          stats.connections[receiverId].count++;
+          stats.connections[receiverId].totalPoints +=
+            action.packingPoints ?? 0;
+          stats.connections[receiverId].totalXT += action.totalPoints;
+
+          // Dla nowej struktury
+          if (!stats.connectionsAsSender[receiverId]) {
+            stats.connectionsAsSender[receiverId] = {
+              playerName: `${action.receiverNumber || ""}-${
+                action.receiverName || ""
+              }`,
+              count: 0,
+              totalPoints: 0,
+              totalXT: 0,
+            };
+          }
+          stats.connectionsAsSender[receiverId].count++;
+          stats.connectionsAsSender[receiverId].totalPoints +=
+            action.packingPoints ?? 0;
+          stats.connectionsAsSender[receiverId].totalXT += action.totalPoints;
         }
-        stats.connections[receiverId].count++;
-        stats.connections[receiverId].totalPoints += action.packingPoints ?? 0;
-        stats.connections[receiverId].totalXT += action.totalPoints;
       }
 
+      // Połączenia jako przyjmujący (receiver)
       if (action.receiverId === player.id) {
         stats.packingAsReceiver += action.packingPoints ?? 0;
         stats.xtAsReceiver += action.totalPoints;
+
+        const senderId = action.senderId;
+        if (senderId) {
+          // Upewnij się, że senderId istnieje
+          if (!stats.connectionsAsReceiver[senderId]) {
+            stats.connectionsAsReceiver[senderId] = {
+              playerName: `${action.senderNumber || ""}-${
+                action.senderName || ""
+              }`,
+              count: 0,
+              totalPoints: 0,
+              totalXT: 0,
+            };
+          }
+          stats.connectionsAsReceiver[senderId].count++;
+          stats.connectionsAsReceiver[senderId].totalPoints +=
+            action.packingPoints ?? 0;
+          stats.connectionsAsReceiver[senderId].totalXT += action.totalPoints;
+        }
       }
     });
 
@@ -74,16 +154,97 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
     setStats(stats);
   }, [player, actions]);
 
-  // Przekształcamy obiekt connections na tablicę
-  const connectionsArray = Object.entries(stats.connections).map(
-    ([playerId, connection]) => ({
-      playerId,
-      ...connection,
-    })
+  // Funkcje sortujące
+  const requestSort = (key: string, isSender: boolean) => {
+    if (isSender) {
+      setSenderSortConfig((prevConfig) => {
+        if (prevConfig.key === key) {
+          return {
+            key,
+            direction:
+              prevConfig.direction === "ascending" ? "descending" : "ascending",
+          };
+        }
+        return { key, direction: "descending" };
+      });
+    } else {
+      setReceiverSortConfig((prevConfig) => {
+        if (prevConfig.key === key) {
+          return {
+            key,
+            direction:
+              prevConfig.direction === "ascending" ? "descending" : "ascending",
+          };
+        }
+        return { key, direction: "descending" };
+      });
+    }
+  };
+
+  // Przekształcamy obiekt połączeń na tablice
+  const connectionsAsSenderArray = Object.entries(
+    stats.connectionsAsSender
+  ).map(([playerId, connection]) => ({
+    playerId,
+    ...connection,
+  }));
+
+  const connectionsAsReceiverArray = Object.entries(
+    stats.connectionsAsReceiver
+  ).map(([playerId, connection]) => ({
+    playerId,
+    ...connection,
+  }));
+
+  // Sortujemy połączenia zgodnie z konfiguracją sortowania
+  const sortedSenderConnections = [...connectionsAsSenderArray].sort((a, b) => {
+    if (senderSortConfig.key === "playerName") {
+      return senderSortConfig.direction === "ascending"
+        ? a.playerName.localeCompare(b.playerName)
+        : b.playerName.localeCompare(a.playerName);
+    }
+
+    const aValue = a[senderSortConfig.key as keyof typeof a];
+    const bValue = b[senderSortConfig.key as keyof typeof b];
+
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return senderSortConfig.direction === "ascending"
+        ? aValue - bValue
+        : bValue - aValue;
+    }
+
+    return 0;
+  });
+
+  const sortedReceiverConnections = [...connectionsAsReceiverArray].sort(
+    (a, b) => {
+      if (receiverSortConfig.key === "playerName") {
+        return receiverSortConfig.direction === "ascending"
+          ? a.playerName.localeCompare(b.playerName)
+          : b.playerName.localeCompare(a.playerName);
+      }
+
+      const aValue = a[receiverSortConfig.key as keyof typeof a];
+      const bValue = b[receiverSortConfig.key as keyof typeof b];
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return receiverSortConfig.direction === "ascending"
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      return 0;
+    }
   );
 
-  // Sortujemy połączenia po liczbie akcji (malejąco)
-  connectionsArray.sort((a, b) => b.count - a.count);
+  // Funkcja dla wyświetlania ikony sortowania
+  const getSortIcon = (
+    key: string,
+    config: { key: string; direction: "ascending" | "descending" }
+  ) => {
+    if (key !== config.key) return null;
+    return config.direction === "ascending" ? "▲" : "▼";
+  };
 
   return (
     <div className={styles.statsContainer}>
@@ -115,6 +276,18 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
           <div className={styles.statValue}>{stats.totalP3}</div>
         </div>
 
+        {/* Nowy kafelek - strzały */}
+        <div className={`${styles.statItem} ${styles.shotStat}`}>
+          <div className={styles.statLabel}>Liczba strzałów</div>
+          <div className={styles.statValue}>{stats.totalShots}</div>
+        </div>
+
+        {/* Nowy kafelek - bramki */}
+        <div className={`${styles.statItem} ${styles.goalStat}`}>
+          <div className={styles.statLabel}>Liczba bramek</div>
+          <div className={styles.statValue}>{stats.totalGoals}</div>
+        </div>
+
         {/* Statystyki jako nadawca */}
         <div className={`${styles.statItem} ${styles.senderStat}`}>
           <div className={styles.statLabel}>Packing jako nadawca</div>
@@ -140,30 +313,98 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ player, actions }) => {
         </div>
       </div>
 
-      <h3 className={styles.connectionsTitle}>Najczęstsze połączenia</h3>
-      {connectionsArray.length > 0 ? (
+      {/* Połączenia jako podający */}
+      <h3 className={styles.connectionsTitle}>Połączenia, jako podający</h3>
+      {sortedSenderConnections.length > 0 ? (
         <table className={styles.connectionsTable}>
           <thead>
             <tr>
-              <th>Zawodnik</th>
-              <th>Liczba</th>
-              <th>Packing</th>
-              <th>xT</th>
+              <th
+                onClick={() => requestSort("playerName", true)}
+                className={styles.sortableHeader}
+              >
+                Zawodnik {getSortIcon("playerName", senderSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("count", true)}
+                className={styles.sortableHeader}
+              >
+                Liczba {getSortIcon("count", senderSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("totalPoints", true)}
+                className={styles.sortableHeader}
+              >
+                Packing {getSortIcon("totalPoints", senderSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("totalXT", true)}
+                className={styles.sortableHeader}
+              >
+                xT {getSortIcon("totalXT", senderSortConfig)}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {connectionsArray.map((connection) => (
+            {sortedSenderConnections.map((connection) => (
               <tr key={connection.playerId}>
                 <td>{connection.playerName}</td>
                 <td>{connection.count}</td>
-                <td>{connection.totalPoints}</td>
+                <td>{connection.totalPoints.toFixed(2)}</td>
                 <td>{connection.totalXT.toFixed(4)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        <p className={styles.noConnections}>Brak połączeń do wyświetlenia</p>
+        <p className={styles.noConnections}>Brak podań do innych zawodników</p>
+      )}
+
+      {/* Połączenia jako przyjmujący */}
+      <h3 className={styles.connectionsTitle}>Połączenia, jako przyjmujący</h3>
+      {sortedReceiverConnections.length > 0 ? (
+        <table className={styles.connectionsTable}>
+          <thead>
+            <tr>
+              <th
+                onClick={() => requestSort("playerName", false)}
+                className={styles.sortableHeader}
+              >
+                Zawodnik {getSortIcon("playerName", receiverSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("count", false)}
+                className={styles.sortableHeader}
+              >
+                Liczba {getSortIcon("count", receiverSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("totalPoints", false)}
+                className={styles.sortableHeader}
+              >
+                Packing {getSortIcon("totalPoints", receiverSortConfig)}
+              </th>
+              <th
+                onClick={() => requestSort("totalXT", false)}
+                className={styles.sortableHeader}
+              >
+                xT {getSortIcon("totalXT", receiverSortConfig)}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedReceiverConnections.map((connection) => (
+              <tr key={connection.playerId}>
+                <td>{connection.playerName}</td>
+                <td>{connection.count}</td>
+                <td>{connection.totalPoints.toFixed(2)}</td>
+                <td>{connection.totalXT.toFixed(4)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className={styles.noConnections}>Brak podań od innych zawodników</p>
       )}
     </div>
   );
