@@ -34,6 +34,8 @@ const App: React.FC = () => {
   const [actionMinute, setActionMinute] = useState<number>(0);
   const [actionType, setActionType] = useState<"pass" | "dribble">("pass");
   const [isP3Active, setIsP3Active] = useState(false);
+  const [isShot, setIsShot] = useState(false);
+  const [isGoal, setIsGoal] = useState(false);
   const [clickValue1, setClickValue1] = useState<number | null>(null);
   const [clickValue2, setClickValue2] = useState<number | null>(null);
 
@@ -44,7 +46,15 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem("actions", JSON.stringify(actions));
   }, [actions]);
-
+  const handleDeleteAllActions = () => {
+    if (
+      window.confirm(
+        "Czy na pewno chcesz usunąć wszystkie akcje? Tej operacji nie można cofnąć."
+      )
+    ) {
+      setActions([]);
+    }
+  };
   const handleZoneSelect = (
     zone: number | null,
     xT?: number,
@@ -98,6 +108,8 @@ const App: React.FC = () => {
     setClickValue2(null);
     setActionType("pass");
     setIsP3Active(false);
+    setIsShot(false);
+    setIsGoal(false);
   };
 
   const handleSaveAction = () => {
@@ -143,6 +155,8 @@ const App: React.FC = () => {
       packingPoints: currentPoints,
       xTValue: currentPoints * multiplier,
       isP3: isP3Active,
+      isShot: isShot,
+      isGoal: isGoal,
     };
 
     setActions((prev) => [...prev, newAction]);
@@ -188,12 +202,17 @@ const App: React.FC = () => {
               setCurrentPoints={setCurrentPoints}
               isP3Active={isP3Active}
               setIsP3Active={setIsP3Active}
+              // isShot={isShot}
+              // setIsShot={setIsShot}
+              // isGoal={isGoal}
+              // setIsGoal={setIsGoal}
               handleSaveAction={handleSaveAction}
               resetActionState={resetActionState}
             />
             <ActionsTable
               actions={actions}
               onDeleteAction={handleDeleteAction}
+              onDeleteAllActions={handleDeleteAllActions}
             />
           </>
         ) : (

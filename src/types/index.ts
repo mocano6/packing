@@ -53,7 +53,9 @@ export interface Action {
   actionType: "pass" | "dribble";
   packingPoints?: number;
   xTValue?: number;
-  isP3?: boolean; // Dodane pole isP3
+  isP3?: boolean;
+  isShot: boolean;
+  isGoal: boolean;
 }
 
 export interface ActionSectionProps {

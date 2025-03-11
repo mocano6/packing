@@ -11,13 +11,14 @@ type SortKey =
   | "type"
   | "xt"
   | "packing"
-  | "p3"; // Dodany klucz sortowania dla P3
+  | "p3";
 
 type SortDirection = "asc" | "desc";
 
 const ActionsTable: React.FC<ActionsTableProps> = ({
   actions,
   onDeleteAction,
+  onDeleteAllActions, // Nowy prop do obsługi usuwania wszystkich akcji
 }) => {
   const [sortConfig, setSortConfig] = useState<{
     key: SortKey;
@@ -73,7 +74,7 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
           const packingB = b.packingPoints || 0;
           comparison = packingA - packingB;
           break;
-        case "p3": // Obsługa sortowania po kolumnie P3
+        case "p3":
           comparison = (a.isP3 ? 1 : 0) - (b.isP3 ? 1 : 0);
           break;
         default:
@@ -88,10 +89,20 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
     if (sortConfig.key !== key) return "↕️";
     return sortConfig.direction === "asc" ? "↑" : "↓";
   };
-  console.log(actions);
 
   return (
     <div className={styles.tableContainer}>
+      <div className={styles.tableHeader}>
+        <h3>Lista akcji ({actions.length})</h3>
+        <button
+          className={styles.deleteAllButton}
+          onClick={onDeleteAllActions}
+          disabled={actions.length === 0}
+        >
+          <span>🗑️</span> Usuń wszystkie akcje
+        </button>
+      </div>
+
       <table className={styles.table}>
         <thead>
           <tr>
@@ -137,7 +148,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
             >
               Packing {getSortIcon("packing")}
             </th>
-            {/* Nowa kolumna P3 */}
             <th onClick={() => handleSort("p3")} className={styles.sortable}>
               P3 {getSortIcon("p3")}
             </th>
@@ -161,7 +171,6 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
               <td>
                 {action.packingPoints ? Math.round(action.packingPoints) : "-"}
               </td>
-              {/* Nowa komórka P3 */}
               <td>{action.isP3 ? "✅" : "-"}</td>
               <td className={styles.actionCell}>
                 <div
@@ -173,6 +182,13 @@ const ActionsTable: React.FC<ActionsTableProps> = ({
               </td>
             </tr>
           ))}
+          {actions.length === 0 && (
+            <tr>
+              <td colSpan={10} style={{ textAlign: "center", padding: "20px" }}>
+                Brak akcji do wyświetlenia
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
