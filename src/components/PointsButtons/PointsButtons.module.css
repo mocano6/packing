@@ -105,3 +105,29 @@
   background-color: #e3f2fd;
   border: 2px solid #2196f3;
 }
+/* Dodaj do PointsButtons.module.css */
+
+.checkboxContainer {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 5px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 15px;
+  font-size: 14px;
+}
+
+.checkboxLabel input {
+  margin-right: 8px;
+}
+
+.checkboxLabel span {
+  font-weight: 500;
+}

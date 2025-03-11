@@ -75,11 +75,13 @@ export interface ActionSectionProps {
   actionType: "pass" | "dribble";
   setActionType: (type: "pass" | "dribble") => void;
   currentPoints: number;
-  setCurrentPoints: (fn: (prev: number) => number) => void;
+  setCurrentPoints: React.Dispatch<React.SetStateAction<number>>; // Zamiast (points: number) => void
   isP3Active: boolean;
-  setIsP3Active: (fn: (prev: boolean) => boolean) => void;
-  handleSaveAction: () => void;
-  resetActionState: () => void;
+  setIsP3Active: React.Dispatch<React.SetStateAction<boolean>>; // Zamiast (active: boolean) => void
+  isShot: boolean;
+  setIsShot: React.Dispatch<React.SetStateAction<boolean>>;
+  isGoal: boolean;
+  setIsGoal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface SummarySectionProps {

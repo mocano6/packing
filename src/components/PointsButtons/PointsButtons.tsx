@@ -8,6 +8,10 @@ const PointsButtons: React.FC<PointsButtonsProps> = ({
   onAddPoints,
   isP3Active,
   onP3Toggle,
+  isShot,
+  onShotToggle,
+  isGoal,
+  onGoalToggle,
   onSaveAction,
   onReset,
 }) => {
@@ -48,6 +52,37 @@ const PointsButtons: React.FC<PointsButtonsProps> = ({
             </button>
           )
         )}
+
+        {/* Przycisk "Strzał" jako toggle button */}
+        <button
+          className={`${styles.actionButton} ${
+            isShot ? styles.activeButton : ""
+          }`}
+          onClick={() => onShotToggle(!isShot)}
+        >
+          <span className={styles.buttonLabel}>Strzał</span>
+          <span className={styles.buttonDescription}>
+            Zaznacz jeśli akcja zakończyła się strzałem
+          </span>
+        </button>
+
+        {/* Przycisk "Bramka" jako toggle button, wyłączony gdy nie ma strzału */}
+        <button
+          className={`${styles.actionButton} ${
+            isGoal ? styles.activeButton : ""
+          }`}
+          onClick={() => onGoalToggle(!isGoal)}
+          disabled={!isShot}
+          style={{
+            opacity: !isShot ? 0.5 : 1,
+            cursor: !isShot ? "not-allowed" : "pointer",
+          }}
+        >
+          <span className={styles.buttonLabel}>Bramka</span>
+          <span className={styles.buttonDescription}>
+            Zaznacz jeśli strzał zakończył się bramką
+          </span>
+        </button>
       </div>
 
       <div className={styles.controlButtons}>

@@ -4,6 +4,10 @@ export interface PointsButtonsProps {
   onAddPoints: (points: number) => void;
   isP3Active: boolean;
   onP3Toggle: () => void;
+  isShot: boolean;
+  onShotToggle: (newValue: boolean) => void;
+  isGoal: boolean;
+  onGoalToggle: (newValue: boolean) => void;
   onSaveAction: () => void;
   onReset: () => void;
 }

@@ -202,10 +202,10 @@ const App: React.FC = () => {
               setCurrentPoints={setCurrentPoints}
               isP3Active={isP3Active}
               setIsP3Active={setIsP3Active}
-              // isShot={isShot}
-              // setIsShot={setIsShot}
-              // isGoal={isGoal}
-              // setIsGoal={setIsGoal}
+              isShot={isShot}
+              setIsShot={setIsShot}
+              isGoal={isGoal}
+              setIsGoal={setIsGoal}
               handleSaveAction={handleSaveAction}
               resetActionState={resetActionState}
             />
