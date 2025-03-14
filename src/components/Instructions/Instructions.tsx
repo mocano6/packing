@@ -46,7 +46,7 @@ const Instructions: React.FC = () => {
             <li>Liczymy tylo podania progresywne</li>
             <li>
               Wyjątkiem są podania na wysokości pola karnego, je liczymy do
-              środka
+              środka.
             </li>
           </ul>
           <p>
