@@ -14,11 +14,13 @@ const Instructions: React.FC = () => {
         <>
           <ol>
             <li>Wybierz zawodnika rozpoczynającego akcję (nadawcę)</li>
-            <li>Kliknij na boisko, aby zaznaczyć strefę początkową (X)</li>
-            <li>Kliknij ponownie, aby zaznaczyć strefę końcową (O)</li>
+            <li>Kliknij na boisko, aby zaznaczyć strefę podania</li>
+            <li>Kliknij ponownie, aby zaznaczyć strefę przyjęca</li>
             <li>Wybierz zawodnika kończącego akcję (odbiorcę)</li>
             <li>Wprowadź minutę meczu (0-90+)</li>
             <li>Użyj opcji P3, jeśli podanie trafia za linię oborony</li>
+            <li>Użyj opcji Strzał, jeśli podanie zakończyło się strzałem</li>
+            <li>Użyj opcji gol, jeśli strzał zakończył się golem</li>
             <li>Kliknij "Zapisz akcję" aby dodać podanie do bazy</li>
           </ol>
         </>
@@ -35,8 +37,17 @@ const Instructions: React.FC = () => {
           </p>
           <ul>
             <li>Liczby ominętych zawodników</li>
+            <li>
+              Jeśli masz wątpliwość, czy zawodnik został minięty, znaczy, ze nie
+              został
+            </li>
             <li>Pozycji na boisku (strefy)</li>
             <li>Jakości wykonania podania</li>
+            <li>Liczymy tylo podania progresywne</li>
+            <li>
+              Wyjątkiem są podania na wysokości pola karnego, je liczymy do
+              środka
+            </li>
           </ul>
           <p>
             <strong>Expected Threat (xT):</strong> Przyznawany dodatkowo jako
@@ -60,7 +71,10 @@ const Instructions: React.FC = () => {
             </li>
             <li>Regularnie eksportuj dane, aby uniknąć ich utraty</li>
             <li>Analizuj połączenia między zawodnikami w sekcji statystyk</li>
-            <li>Konsekwentnie oznaczaj podania P3 dla spójnej analizy</li>
+            <li>
+              Konsekwentnie oznaczaj podania P3, strzał i bramkę dla spójnej
+              analizy
+            </li>
           </ul>
         </>
       ),
