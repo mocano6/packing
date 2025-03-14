@@ -43,7 +43,7 @@ const Instructions: React.FC = () => {
             </li>
             <li>Pozycji na boisku (strefy)</li>
             <li>Jakości wykonania podania</li>
-            <li>Liczymy tylo podania progresywne</li>
+            <li>Liczymy tylo podania progresywne.</li>
             <li>
               Wyjątkiem są podania na wysokości pola karnego, je liczymy do
               środka.
